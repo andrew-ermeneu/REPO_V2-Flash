@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="Flex" version="4">
+  <component name="FlexBuildConfigurationManager" active="stuart_dev_test_token">
+    <configurations>
+      <configuration name="stuart_dev_test_token" pure-as="true" main-class="Main" output-file="Main.swf" output-folder="$MODULE_DIR$/out/production/stuart_dev_test_token" skip-build="true">
+        <dependencies target-player="10.2">
+          <entries>
+            <entry library-id="14dc1100-d8f2-48df-9669-a5791becc87a">
+              <dependency linkage="Merged" />
+            </entry>
+            <entry library-id="4e75881d-0f89-4b14-ac06-16b30e6792be">
+              <dependency linkage="Merged" />
+            </entry>
+          </entries>
+          <sdk name="flex_sdk_4.5.1.21328A" />
+        </dependencies>
+        <compiler-options />
+        <packaging-air-desktop />
+        <packaging-android />
+        <packaging-ios />
+      </configuration>
+    </configurations>
+    <compiler-options />
+  </component>
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/libs" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Classes" isTestSource="false" />
+    </content>
+    <orderEntry type="jdk" jdkName="flex_sdk_4.5.1.21328A" jdkType="Flex SDK Type (new)" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library" exported="">
+      <library type="flex">
+        <properties id="14dc1100-d8f2-48df-9669-a5791becc87a" />
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/as3corelib.swc!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library type="flex">
+        <properties id="4e75881d-0f89-4b14-ac06-16b30e6792be" />
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/fl_package.swc!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+  </component>
+</module>
+
