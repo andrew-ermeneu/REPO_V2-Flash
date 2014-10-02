@@ -9,7 +9,7 @@ public class Config {
 
     public static const REQUEST_RETRY_TIMEOUT:Number = 2000;
 
-    public static const DEFAULT_API_URL:String = "http://api.cloudcovermusic.com/";
+    public static const DEFAULT_API_URL2:String = "http://api.cloudcovermusic.com/";
 //    private const API_URL:String = "http://dev-api.cloudcovermusic.com/";
 //    private const API_URL:String = "http://stage-api.cloudcovermusic.com/";
 
@@ -21,7 +21,7 @@ public class Config {
 
 
     public static const name:String = "Player";
-    public static const version:String = "v0.0.42";
+    public static const version:String = "v0.0.47";
 
 
 

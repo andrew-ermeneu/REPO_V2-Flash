@@ -54,10 +54,12 @@ public class Track extends Sprite{
 
     private function getTrackJson():void {
 
+        trace("\t\t ******* getTrackJson, service_api.api_url = " + ServiceAPI.api_url);
+
         var request:RequestVO = new RequestVO();
         request.id = id;
         request.method = URLRequestMethod.GET;
-        request.url = service_api.api_url + RequestVO.REQUEST_GET_MEDIA + "?token=" + modelInst.token;
+        request.url = ServiceAPI.api_url + RequestVO.REQUEST_GET_MEDIA + "?token=" + modelInst.token;
         request.type = RequestVO.REQUEST_GET_MEDIA;
         service_api.makeRequest(request);
     }
@@ -172,14 +174,16 @@ public class Track extends Sprite{
 
 
     public function play():void {
-        trace("\t Track play");
-
-
-        player.play();
+        trace("\t Track play, isPreloaded("+isPreloaded+") player = " + player);
+        if(player != null ){
+            player.play();
+        }
     }
     public function pause():void {
-        trace("\t Track pause");
-        player.pause();
+        trace("\t Track pause,  isPreloaded("+isPreloaded+") player = " + player);
+        if(player != null ){
+            player.pause();
+        }
     }
 
 
@@ -194,6 +198,8 @@ public class Track extends Sprite{
     public function kill():void{
 
         trace("\t Track kill");
+        isPreloaded = false;
+
         service_api.removeEventListener(CustomPlayerEvent.INIT_DATA_ERROR, handleApiRequestError);
         service_api.removeEventListener(CustomPlayerEvent.INIT_DATA_GOT_SUCCESS, handleApiRequestSuccess);
 

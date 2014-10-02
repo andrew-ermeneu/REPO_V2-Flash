@@ -57,9 +57,12 @@ import models.Config;
 
 		private const NUM_TRACKS_IN_CACHE: uint = 3;
 
-		private var curTrack: Track;
-
 		private var jsFunc: String;
+
+        private var isPlayed:Boolean = false;
+        private var isPaused:Boolean = false;
+
+        private var curTrack:Track;
 
 
 		public function Main() {
@@ -67,7 +70,13 @@ import models.Config;
 			var title: String = "\n\n ************************ " + Config.name + " " + Config.version + " ************************ \n\n";
 			trace(title);
 
-			Security.allowDomain('*');
+            var flashvars:Object = loaderInfo.parameters;
+            for (var key:String in flashvars) {
+                trace("\t * flashvars[" + key + "] = " + flashvars[key]);
+            }
+
+
+            Security.allowDomain('*');
 			Security.allowInsecureDomain('*');
 
 			//        Security.loadPolicyFile("http://dev-api.cloudcovermusic.com/crossdomain.xml");
@@ -81,17 +90,22 @@ import models.Config;
 			service_api.addEventListener(CustomPlayerEvent.INIT_DATA_GOT_SUCCESS, handleApiRequestSuccess);
 
 
+
+
+
 			if (loaderInfo.parameters["jsFunc"] != null && loaderInfo.parameters["jsFunc"] != "") {
 				jsFunc = loaderInfo.parameters["jsFunc"];
 			} else {
 				jsFunc = Config.DEFAULT_JS_FUNC;
 			}
 
+
+            ServiceAPI.api_url = Config.DEFAULT_API_URL2;
 			if (loaderInfo.parameters["api_url"] != null && loaderInfo.parameters["api_url"] != "") {
-				service_api.api_url = loaderInfo.parameters["api_url"];
-			} else {
-				service_api.api_url = Config.DEFAULT_API_URL;
+				ServiceAPI.api_url = loaderInfo.parameters["api_url"];
 			}
+            trace("ServiceAPI.api_url = " + ServiceAPI.api_url);
+
 
 			if (loaderInfo.parameters["isActivate"] != null && loaderInfo.parameters["isActivate"] != "") {
 				isPlayerActive = loaderInfo.parameters["isActivate"];
@@ -177,7 +191,13 @@ import models.Config;
 			nextBtn.addEventListener(MouseEvent.CLICK, nextClickHandler);
 
 			removeBtn.addEventListener(MouseEvent.CLICK, removeClickHandler);
-		}
+
+
+            bufferWheelMc.visible = true;
+            detailsMc.visible = false;
+
+
+        }
 
 
 
@@ -187,7 +207,6 @@ import models.Config;
 		 *  WORKING WITH API
 		 *
 		 *********************************************************/
-
 		private function getToken(): void {
 			var cur_json_obj: Object = {};
 			cur_json_obj.username = modelInst.username;
@@ -196,7 +215,9 @@ import models.Config;
 
 			var request: RequestVO = new RequestVO();
 			request.method = URLRequestMethod.POST;
-			request.url = service_api.api_url + RequestVO.REQUEST_GET_TOKEN;
+            trace("\t\t ******* getToken, service_api.api_url = " + ServiceAPI.api_url);
+
+			request.url = ServiceAPI.api_url + RequestVO.REQUEST_GET_TOKEN;
 			request.type = RequestVO.REQUEST_GET_TOKEN;
 			request.object = cur_json_obj;
 
@@ -215,7 +236,7 @@ import models.Config;
 
 			var request: RequestVO = new RequestVO();
 			request.method = URLRequestMethod.POST;
-			request.url = service_api.api_url + RequestVO.REQUEST_REGISTER_DEVICE + "?token=" + modelInst.token;
+			request.url = ServiceAPI.api_url + RequestVO.REQUEST_REGISTER_DEVICE + "?token=" + modelInst.token;
 			request.type = RequestVO.REQUEST_REGISTER_DEVICE;
 			request.object = cur_json_obj;
 
@@ -225,11 +246,11 @@ import models.Config;
 
 
 		private function activateDevice(): void {
-
+            trace("\t\t ******* activateDevice, service_api.api_url = " + ServiceAPI.api_url);
 
 			var request: RequestVO = new RequestVO();
 			request.method = URLRequestMethod.PUT;
-			request.url = service_api.api_url + RequestVO.REQUEST_ACTIVATE_DEVICE + "?token=" + modelInst.token;
+			request.url = ServiceAPI.api_url + RequestVO.REQUEST_ACTIVATE_DEVICE + "?token=" + modelInst.token;
 			request.type = RequestVO.REQUEST_ACTIVATE_DEVICE;
 
 			service_api.makeRequest(request);
@@ -239,9 +260,12 @@ import models.Config;
 
 		private function getCommands(): void {
 
-			var request: RequestVO = new RequestVO();
+            trace("\t\t ******* getCommands, service_api.api_url = " + ServiceAPI.api_url);
+
+
+            var request: RequestVO = new RequestVO();
 			request.method = URLRequestMethod.GET;
-			request.url = service_api.api_url + RequestVO.REQUEST_GET_COMMANDS + "?token=" + modelInst.token;
+			request.url = ServiceAPI.api_url + RequestVO.REQUEST_GET_COMMANDS + "?token=" + modelInst.token;
 			request.type = RequestVO.REQUEST_GET_COMMANDS;
 			service_api.makeRequest(request);
 		}
@@ -336,12 +360,15 @@ import models.Config;
 		 ************************************************************************************/
 
 		private function pauseClickHandler(event: MouseEvent): void {
+            isPaused  = true;
 			curTrack.pause();
 			playBtn.visible = true;
 			pauseBtn.visible = false;
 		}
 
 		private function playClickHandler(event: MouseEvent): void {
+            isPaused  = false;
+
 			curTrack.play();
 			playBtn.visible = false;
 			pauseBtn.visible = true;
@@ -349,7 +376,7 @@ import models.Config;
 
 
 		private function nextClickHandler(event: MouseEvent): void {
-			handleTrackPlayed(null);
+			handleTrackPlayed(curTrack);
 		}
 
 
@@ -373,22 +400,12 @@ import models.Config;
 
 			trace("Main getNextTrack");
 
-            if(curTrack != null ){
-                curTrack.kill();
-                curTrack = null;
-            }
-
-
             if (tracks_pool.length > 0) {
 
-                curTrack = tracks_pool.shift();
+                playCurTrack(tracks_pool.shift());
 
-                if(curTrack.isPreloaded){
-                    playCurTrack();
-
-                } else {
-                    curTrack.signal_preloaded.add(handleTrackPreloaded);
-                }
+            } else {
+                checkIfCacheIsFull();
             }
 
 
@@ -403,86 +420,120 @@ import models.Config;
 		 *
 		 *********************************************************/
 
+        private function handleTrackPreloaded(track: Track): void {
+            trace("\n\n\n >>>>>>>>>> Main handleTrackPreloaded, " + track.meta_song_name + ", track = " + track);
+
+            checkIfCacheIsFull();
+
+            if( track.isPreloaded && !isPlayed && !isPaused){
+                playCurTrack(track);
+            }
+        }
+
+
 		private function handleTrackError(track: Track): void {
 
 			trace("Main handleTrackError");
-
-
 
             tracks_pool.splice(tracks_pool.indexOf(track),1);
             track.kill();
             track = null;
 
-//			getNextTrack();
-            setTimeout(getNextTrack, 200);
+            checkIfCacheIsFull();
+
+
+//            setTimeout(getNextTrack, 1000);
 		}
+
+
+
+
+        private function checkIfCacheIsFull():void {
+            if (tracks_pool.length < NUM_TRACKS_IN_CACHE) {
+                var track: Track = new Track();
+                track.signal_preloaded.add(handleTrackPreloaded);
+                track.signal_loading_error.add(handleTrackError);
+                track.signal_played.add(handleTrackPlayed);
+                tracks_pool.push(track);
+            }
+        }
 
 
 		private function handleTrackPlayed(track: Track): void {
 
-			trace("Main handleTrackPlayed, " + curTrack.meta_song_name);
+			trace("Main handleTrackPlayed");
 
-			songNameTxt.text = "";
+            isPlayed = false;
+            isPaused = false;
+
+            songNameTxt.text = "";
 			artistNameTxt.text = "";
 
-            setTimeout(getNextTrack, 1000);
-//			getNextTrack();
+            bufferWheelMc.visible = true;
+            detailsMc.visible = false;
+            controlsMc.visible = false;
+
+            imgl.unload();
+
+            if(curTrack!= null){
+                curTrack.kill();
+                curTrack = null;
+            }
+
+			getNextTrack();
 		}
 
-		private function handleTrackPreloaded(track: Track): void {
-			trace("\n\n\n >>>>>>>>>> Main handleTrackPreloaded, " + track.meta_song_name + ", curTrack = " + curTrack);
-            curTrack.signal_preloaded.removeAll();
-
-            playCurTrack();
 
 
-            if (tracks_pool.length < NUM_TRACKS_IN_CACHE) {
 
-                var num_to_cache: int = NUM_TRACKS_IN_CACHE - tracks_pool.length;
-                for (var i: int = 0; i < num_to_cache; i++) {
-                    var track: Track = new Track();
-                    track.signal_loading_error.add(handleTrackError);
-                    track.signal_played.add(handleTrackPlayed);
-                    tracks_pool.push(track);
+		private function playCurTrack(track:Track): void {
+			trace("\n\n\n\n ******************************* Main playCurTrack: " + track.meta_song_name);
+
+
+
+            if( track.isPreloaded ){
+
+                bufferWheelMc.visible = false;
+                detailsMc.visible = true;
+                controlsMc.visible = true;
+                
+                isPlayed = true;
+                isPaused = false;
+
+                curTrack = track;
+
+                bufferWheelMc.visible = false;
+                controlsMc.visible = false;
+                detailsMc.visible = true;
+
+                songNameTxt.text = track.meta_song_name;
+                artistNameTxt.text = "";
+
+
+                if (imgl != null) {
+                    imgl.unload();
                 }
+
+                if (!track.isMp3) {
+                    controlsMc.visible = true;
+                    albumViewerMc.visible = true;
+                    albumViewerMc.alpha = 1;
+
+                    artistNameTxt.text = track.meta_artist;
+
+                    imgl.url = track.meta_album_img_src;
+                    trace("img url  = " + imgl.url);
+                    imgl.load(false);
+
+                    //    //            TweenLite.to(albumViewerMc, 0.5, {alpha:1});
+                }
+
+                track.play();
             }
 
 
-        }
 
-
-
-
-		private function playCurTrack(): void {
-			trace("\n\n\n\n ******************************* Main playCurTrack: " + curTrack.meta_song_name);
-
-			bufferWheelMc.visible = false;
-			controlsMc.visible = false;
-			detailsMc.visible = true;
-
-			songNameTxt.text = curTrack.meta_song_name;
-			artistNameTxt.text = "";
-
-
-			if (imgl != null) {
-				imgl.unload();
-			}
-
-			if (!curTrack.isMp3) {
-				controlsMc.visible = true;
-				albumViewerMc.visible = true;
-				albumViewerMc.alpha = 1;
-
-				artistNameTxt.text = curTrack.meta_artist;
-
-				imgl.url = curTrack.meta_album_img_src;
-				trace("img url  = " + imgl.url);
-				imgl.load(false);
-
-				//    //            TweenLite.to(albumViewerMc, 0.5, {alpha:1});
-			}
-
-			curTrack.play();
+            checkIfCacheIsFull();
 		}
 
 
@@ -532,7 +583,7 @@ import models.Config;
 				}
 				var request: RequestVO = new RequestVO();
 				request.method = URLRequestMethod.POST;
-				request.url = service_api.api_url + RequestVO.REQUEST_REMOVE_SONG + "?token=" + modelInst.token;
+				request.url = ServiceAPI.api_url + RequestVO.REQUEST_REMOVE_SONG + "?token=" + modelInst.token;
 				request.type = RequestVO.REQUEST_REMOVE_SONG;
 				request.object = cur_json_obj;
 				service_api.makeRequest(request);
