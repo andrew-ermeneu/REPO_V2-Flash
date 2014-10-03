@@ -2,7 +2,7 @@
 <module type="Flex" version="4">
   <component name="FlexBuildConfigurationManager" active="stuart_dev_test_token">
     <configurations>
-      <configuration name="stuart_dev_test_token" pure-as="true" main-class="Main" output-file="Main.swf" output-folder="$MODULE_DIR$/out/production/stuart_dev_test_token" skip-build="true">
+      <configuration name="stuart_dev_test_token" pure-as="true" main-class="Main3" output-file="Main.swf" output-folder="$MODULE_DIR$/out/production/stuart_dev_test_token" skip-build="true">
         <dependencies target-player="10.2">
           <entries>
             <entry library-id="14dc1100-d8f2-48df-9669-a5791becc87a">

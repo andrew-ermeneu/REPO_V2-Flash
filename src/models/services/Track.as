@@ -39,7 +39,7 @@ public class Track extends Sprite{
     public function Track() {
 
         id = new Date().getTime() + "_" + Math.random();
-        trace("\n \t ** add new Track: " + id);
+//        trace("\n \t ** add new Track: " + id);
 
         modelInst = ModelMain.getInstance();
 
@@ -54,7 +54,7 @@ public class Track extends Sprite{
 
     private function getTrackJson():void {
 
-        trace("\t\t ******* getTrackJson, service_api.api_url = " + ServiceAPI.api_url);
+//        trace("\t\t ******* getTrackJson, service_api.api_url = " + ServiceAPI.api_url);
 
         var request:RequestVO = new RequestVO();
         request.id = id;
@@ -69,7 +69,7 @@ public class Track extends Sprite{
 
 
     private function handleApiRequestError(event:CustomPlayerEvent):void {
-        trace("** ERRROR: handleApiRequestError: " + (event.body as RequestVO).error_msg);
+//        trace("** ERRROR: handleApiRequestError: " + (event.body as RequestVO).error_msg);
         service_api.removeEventListener(CustomPlayerEvent.INIT_DATA_ERROR, handleApiRequestError);
         service_api.removeEventListener(CustomPlayerEvent.INIT_DATA_GOT_SUCCESS, handleApiRequestSuccess);
 
@@ -89,14 +89,14 @@ public class Track extends Sprite{
 
         var request_vo:RequestVO = event.body as RequestVO;
 
-        trace("Track handleApiRequestSuccess, ( "+id+" == "+request_vo.id+")");
+//        trace("Track handleApiRequestSuccess, ( "+id+" == "+request_vo.id+")");
 
 
 
         if ((event.body as RequestVO).type == RequestVO.REQUEST_GET_MEDIA  && id == request_vo.id) {
 
             var response_obj:Object = request_vo.response_obj;
-            trace("response_obj: " + response_obj);
+//            trace("response_obj: " + response_obj);
 
             if (response_obj.song != null && response_obj.song.uri != null) {
 
@@ -135,7 +135,7 @@ public class Track extends Sprite{
                 player.addEventListener(CustomPlayerEvent.PLAYING_COMPLETED, handlePlayed);
 
             } else {
-                trace("** ERRROR: response error:  " + response_obj.meta.error);
+//                trace("** ERRROR: response error:  " + response_obj.meta.error);
 
 //                setTimeout(getTrackJson, Config.REQUEST_RETRY_TIMEOUT);
 
@@ -149,7 +149,7 @@ public class Track extends Sprite{
 
 
     private function handlePlayerError(event:CustomPlayerEvent):void {
-        trace("** ERRROR: handlePlayerError error:  " + event.body);
+//        trace("** ERRROR: handlePlayerError error:  " + event.body);
 //        setTimeout(getTrackJson, Config.REQUEST_RETRY_TIMEOUT);
         signal_loading_error.dispatch(this);
     }
@@ -159,7 +159,7 @@ public class Track extends Sprite{
 
     private function handlePreloaded(event:CustomPlayerEvent):void {
 
-        trace("\t Track handlePreloaded");
+//        trace("\t Track handlePreloaded");
 
         isPreloaded = true;
 
@@ -174,13 +174,13 @@ public class Track extends Sprite{
 
 
     public function play():void {
-        trace("\t Track play, isPreloaded("+isPreloaded+") player = " + player);
+//        trace("\t Track play, isPreloaded("+isPreloaded+") player = " + player);
         if(player != null ){
             player.play();
         }
     }
     public function pause():void {
-        trace("\t Track pause,  isPreloaded("+isPreloaded+") player = " + player);
+//        trace("\t Track pause,  isPreloaded("+isPreloaded+") player = " + player);
         if(player != null ){
             player.pause();
         }
@@ -189,7 +189,7 @@ public class Track extends Sprite{
 
 
     private function handlePlayed(event:CustomPlayerEvent):void {
-        trace("\t Track handlePlayed");
+//        trace("\t Track handlePlayed");
 
         signal_played.dispatch(this);
     }
@@ -197,7 +197,7 @@ public class Track extends Sprite{
 
     public function kill():void{
 
-        trace("\t Track kill");
+//        trace("\t Track kill");
         isPreloaded = false;
 
         service_api.removeEventListener(CustomPlayerEvent.INIT_DATA_ERROR, handleApiRequestError);

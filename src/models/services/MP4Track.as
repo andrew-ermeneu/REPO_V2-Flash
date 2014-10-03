@@ -32,7 +32,7 @@ public class MP4Track extends EventDispatcher implements IPlayer{
     private var _playing:Boolean = false;
 
     public function MP4Track(url:String) {
-        trace("\t\t new MP4 track =  " + url);
+//        trace("\t\t new MP4 track =  " + url);
 
 
         urlStr=url;
@@ -126,7 +126,7 @@ public class MP4Track extends EventDispatcher implements IPlayer{
         }
 
 
-        trace('asyncErrorHdlr:'+e);
+//        trace('asyncErrorHdlr:'+e);
         dispatchEvent(new CustomPlayerEvent(CustomPlayerEvent.PLAYER_ERROR, e));
     }
 

@@ -40,7 +40,7 @@ public class MP3Track extends EventDispatcher implements IPlayer{
 
     public function MP3Track(url:String) {
 
-        trace("\t\t new MP3 track =  " + url);
+//        trace("\t\t new MP3 track =  " + url);
 
         urlStr=url;
         if(urlStr.indexOf("?") > -1){
@@ -65,7 +65,7 @@ public class MP3Track extends EventDispatcher implements IPlayer{
 
     private function handleSoundLoaded(event:Event):void {
 
-        trace("handleSoundLoaded")
+//        trace("handleSoundLoaded")
 
         sound.removeEventListener(Event.COMPLETE, handleSoundLoaded);
 
@@ -82,7 +82,7 @@ public class MP3Track extends EventDispatcher implements IPlayer{
         sound.removeEventListener( IOErrorEvent.IO_ERROR, handleErrorLoadingSound);
         sound.removeEventListener( SecurityErrorEvent.SECURITY_ERROR, handleErrorLoadingSound);
 
-        trace("** ERROR: " + e.text);
+//        trace("** ERROR: " + e.text);
 
         dispatchEvent(new CustomPlayerEvent(CustomPlayerEvent.PLAYER_ERROR, e));
     }
@@ -90,9 +90,9 @@ public class MP3Track extends EventDispatcher implements IPlayer{
 
     private function handlePlayingSoundCompleted(event:Event):void {
 
-        trace("SOUND COMPLETE: ");
-        trace("\t sndChannel: "  + sndChannel);
-        trace("\t sound: " + sound);
+//        trace("SOUND COMPLETE: ");
+//        trace("\t sndChannel: "  + sndChannel);
+//        trace("\t sound: " + sound);
 
         if(sndChannel!=null){
             sndChannel.removeEventListener(Event.SOUND_COMPLETE, handlePlayingSoundCompleted);
